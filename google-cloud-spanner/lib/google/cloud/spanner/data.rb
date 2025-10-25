@@ -172,7 +172,24 @@ module Google
         def to_h skip_dup_check: nil
           raise DuplicateNameError if !skip_dup_check && fields.duplicate_names?
 
-          keys.zip(to_a(skip_dup_check: skip_dup_check)).to_h
+          result = {}
+          @grpc_fields.each_with_index do |field, i|
+            key = field.name.empty? ? i : field.name.to_sym
+            value = Convert.grpc_value_to_object(@grpc_values[i], field.type)
+
+            converted_value = case value
+                              when Data
+                                value.to_h skip_dup_check: skip_dup_check
+                              when Array
+                                value.map do |v|
+                                  v.is_a?(Data) ? v.to_h(skip_dup_check: skip_dup_check) : v
+                                end
+                              else
+                                value
+                              end
+            result[key] = converted_value
+          end
+          result
         end
 
         # @private
