@@ -60,7 +60,7 @@ module Google
         # @return [Array<Symbol>] An array containing the types of the values.
         #
         def types
-          fields.types
+          @types ||= fields.types
         end
 
         ##
@@ -72,7 +72,7 @@ module Google
         #   data.
         #
         def keys
-          fields.keys
+          @keys ||= fields.keys
         end
 
         ##
@@ -81,7 +81,7 @@ module Google
         # @return [Array<Object>] An array containing the values.
         #
         def values
-          Array.new(keys.count) { |i| self[i] }
+          @values ||= Array.new(keys.count) { |i| self[i] }
         end
 
         ##
@@ -92,7 +92,7 @@ module Google
         #   pairs.
         #
         def pairs
-          keys.zip values
+          @pairs ||= keys.zip values
         end
 
         ##
