@@ -159,16 +159,20 @@ module Google
                 raise ArgumentError,
                       "Cannot determine type for empty array values."
               end
-              non_nil_fields = obj.compact.map { |e| field_for_object e }.compact
-              if non_nil_fields.empty?
+              unique_non_nil_types = obj.each_with_object(Set.new) do |e, types|
+                next if e.nil?
+                type = field_for_object(e)
+                types.add(type) unless type.nil?
+              end
+              if unique_non_nil_types.empty?
                 raise ArgumentError,
                       "Cannot determine type for array of nil values."
               end
-              if non_nil_fields.uniq.count > 1
+              if unique_non_nil_types.count > 1
                 raise ArgumentError,
                       "Cannot determine type for array of different values."
               end
-              [non_nil_fields.first]
+              [unique_non_nil_types.first]
             when Hash
               raw_type_pairs = obj.map do |key, value|
                 [key, field_for_object(value)]
